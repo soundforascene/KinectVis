@@ -78,6 +78,10 @@ public:
 	int farThreshold;
 	
 	int angle;
+    
+    float translateX;
+    float translateY;
+    float translateZ;
 	
 	// used for viewing the point cloud
 	ofEasyCam easyCam;

@@ -9,7 +9,9 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
     
-    ofSetFrameRate(60);
+    
+    
+    ofSetFrameRate(30);
     
     ofSoundUpdate();
     
@@ -32,7 +34,7 @@ void ofApp::setup() {
 	// enable depth->video image calibration
 	kinect.setRegistration(true);
     
-	kinect.init(true);
+	kinect.init(false, false);
 	//kinect.init(true); // shows infrared instead of RGB video image
 	//kinect.init(false, false); // disable video image (faster fps)
 	
@@ -69,9 +71,10 @@ void ofApp::setup() {
 void ofApp::update() {
 
 	
-	ofBackground(100, 100, 100);
+    ofBackground(ofColor::black);
 	
 	kinect.update();
+    
 	
 	// there is a new frame and we are connected
 	if(kinect.isFrameNew()) {
@@ -113,10 +116,7 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 	
-    if (smoothedVol > 0.2) {
-        ofSetColor(ofColor::whiteSmoke);}
-    else {
-        ofSetColor(ofColor::black);}
+    ofSetColor(ofColor::white);
     
     // Changed the if statement so the point cloud starts at launch
 	
@@ -127,7 +127,7 @@ void ofApp::draw() {
 	}
 	
 	// draw instructions
-    ofSetColor(ofColor::lime);
+    ofSetColor(ofColor::black);
 	stringstream reportStream;
 
     
@@ -135,12 +135,13 @@ void ofApp::draw() {
     
 }
 
+
 void ofApp::drawPointCloud() {
 	int w = 640;
 	int h = 480;
 	ofMesh mesh;
 	mesh.setMode (OF_PRIMITIVE_POINTS);
-	int step = 5;
+	int step = 1;
 	for(int y = 0; y < h; y += step) {
 		for(int x = 0; x < w; x += step) {
 			if(kinect.getDistanceAt(x, y) > 0) {
@@ -149,11 +150,11 @@ void ofApp::drawPointCloud() {
 			}
 		}
 	}
-	glPointSize(3);
+	glPointSize(1);
 	ofPushMatrix();
 	// the projected points are 'upside down' and 'backwards' 
-	ofScale(1, -1, smoothedVol*20);
-	ofTranslate(0, 0, -1000); // center the points a bit
+    ofScale(1, -1, -1*smoothedVol*10);
+	ofTranslate(0, 400, -1000); // center the points a bit
 	ofEnableDepthTest();
 	mesh.drawVertices();
 	ofDisableDepthTest();
@@ -182,6 +183,20 @@ void ofApp::keyPressed (int key) {
 			if(angle<-30) angle=-30;
 			kinect.setCameraTiltAngle(angle);
 			break;
+            
+        case 'w':
+            translateX * 20;
+            break;
+        
+        case 'd':
+            translateY * 20;
+            break;
+        case 'a':
+            translateY / 20;
+            break;
+        case 's':
+            translateY * 20;
+            break;
 	}
 }
 //--------------------------------------------------------------
@@ -213,6 +228,12 @@ void ofApp::audioIn(float * input, int bufferSize, int nChannels){
     smoothedVol *= 0.93;
     smoothedVol += 0.07 * curVol;
     
+    if (smoothedVol >= 1) {
+        smoothedVol = 1;}
+    
+    if (smoothedVol >= 5){
+        smoothedVol = 5;}
+        
     bufferCounter++;
     
 }
